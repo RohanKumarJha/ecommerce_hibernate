@@ -2,21 +2,22 @@ package org.practice.dao;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.practice.model.User;
+import org.practice.model.Category;
 import org.practice.util.HibernateUtil;
+
 import java.util.List;
 
-public class UserDao {
+public class CategoryDao {
 
-    public void save(User user) {
+    public void save(Category category) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = null;
             try {
                 transaction = session.beginTransaction();
-                session.persist(user);
+                session.persist(category);
                 transaction.commit();
             } catch (Exception e) {
-                System.out.println("User save failed");
+                System.out.println("Error while saving category");
                 if (transaction != null && transaction.isActive()) {
                     transaction.rollback();
                 }
@@ -27,16 +28,16 @@ public class UserDao {
         }
     }
 
-    public User findById(int id) {
+    public Category findById(int id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = null;
             try {
                 transaction = session.beginTransaction();
-                User user = session.find(User.class, id);
+                Category category = session.find(Category.class, id);
                 transaction.commit();
-                return user;
+                return category;
             } catch (Exception e) {
-                System.out.println("User found failed");
+                System.out.println("Error while getting category");
                 if (transaction != null && transaction.isActive()) {
                     transaction.rollback();
                 }
@@ -47,37 +48,18 @@ public class UserDao {
         }
     }
 
-    public User findByEmail(String email) {
+    public Category findByName(String name) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = null;
             try {
                 transaction = session.beginTransaction();
-                User user = session.createQuery("from User where email = :email",User.class)
-                        .setParameter("email", email).uniqueResult();
+                Category category = session.createQuery("FROM Category WHERE name = :name", Category.class)
+                        .setParameter("name", name)
+                        .uniqueResult();
                 transaction.commit();
-                return user;
+                return category;
             } catch (Exception e) {
-                System.out.println("User found failed");
-                if (transaction != null && transaction.isActive()) {
-                    transaction.rollback();
-                }
-                throw new RuntimeException(e);
-            }
-        }  catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<User> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction transaction = null;
-            try {
-                transaction = session.beginTransaction();
-                List<User> users  = session.createQuery("from User",User.class).list();
-                transaction.commit();
-                return users;
-            } catch (Exception e) {
-                System.out.println("User found failed");
+                System.out.println("Error while getting category");
                 if (transaction != null && transaction.isActive()) {
                     transaction.rollback();
                 }
@@ -88,23 +70,16 @@ public class UserDao {
         }
     }
 
-    public boolean update(User user) {
+    public List<Category> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = null;
             try {
                 transaction = session.beginTransaction();
-                if(findById(user.getId()) == null) {
-                    System.out.println("User not found");
-                    return false;
-                }
-                session.createQuery("update User set name = :name, password = :password where id = :id")
-                        .setParameter("name", user.getName())
-                        .setParameter("password", user.getPassword())
-                        .setParameter("id", user.getId())
-                        .executeUpdate();
+                List<Category> categories = session.createQuery("FROM Category",Category.class).list();
                 transaction.commit();
+                return categories;
             } catch (Exception e) {
-                System.out.println("User found failed");
+                System.out.println("Error while getting categories");
                 if (transaction != null && transaction.isActive()) {
                     transaction.rollback();
                 }
@@ -113,28 +88,29 @@ public class UserDao {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        System.out.println("User updated");
-        return true;
     }
 
-    public boolean deleteById(int id) {
-        Transaction transaction = null;
+    public void deleteById(int id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            User user = session.find(User.class, id);
-            if (user == null) {
-                System.out.println("User not found");
-                return false;
+            Transaction transaction = null;
+            try {
+                transaction = session.beginTransaction();
+                Category category = session.find(Category.class, id);
+                if(category == null) {
+                    System.out.println("Category not found");
+                    return;
+                }
+                session.remove(category);
+                System.out.println("Category deleted");
+                transaction.commit();
+            } catch (Exception e) {
+                System.out.println("Error while getting category");
+                if (transaction != null && transaction.isActive()) {
+                    transaction.rollback();
+                }
             }
-            session.remove(user);
-            transaction.commit();
-            return true;
         } catch (Exception e) {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
             throw new RuntimeException(e);
         }
     }
-
 }

@@ -32,6 +32,9 @@
 
         <!--            Mapping/class            -->
         <mapping class="org.practice.model.User"/>
+        <mapping class="org.practice.model.Category"/>
+        <mapping class="org.practice.model.Product" />
+        <mapping class="org.practice.model.Order" />
 
     </session-factory>
 </hibernate-configuration>
